@@ -20,7 +20,7 @@ def store(request,category_slug=None):
     }
     return render(request,'store/store.html',context)
 
-def product_detail(request,category_slug, product_slug):
+def product_detail(request,category_slug, product_slug): # category__slug to connect its slug
     try:
         single_product = Product.objects.get(category__slug = category_slug,slug = product_slug)
     except Exception as e:
