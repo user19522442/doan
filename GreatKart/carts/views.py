@@ -12,6 +12,10 @@ def _cart_id(request):
 
 # Thêm hàng vào giỏ hàng
 def add_cart(request,product_id):
+    color = request.GET['color']
+    size = request.GET['size']
+    return HttpResponse(color + ' '+ size)
+    exit()
     product = Product.objects.get(id =product_id) # lấy sản phẩm
     try:
         cart = Cart.objects.get(cart_id = _cart_id(request)) # lấy giỏ hàng sử dụng cart_id trên session
