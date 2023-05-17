@@ -1,5 +1,5 @@
 from django.db import models
-from store.models import Product
+from store.models import Product,Variation
 # Create your models here.
 # create a class Cart 
 class Cart(models.Model):
@@ -13,6 +13,7 @@ class Cart(models.Model):
 # create class CartItem
 class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete= models.CASCADE)
+    variations = models.ManyToManyField(Variation,blank=True)
     cart    = models.ForeignKey(Cart, on_delete= models.CASCADE)
     quality = models.IntegerField()
     is_active = models.BooleanField(default=True)
@@ -20,5 +21,5 @@ class CartItem(models.Model):
     def sub_total(self):
         return self.product.price * self.quality
     
-    def __str__ (self):
+    def __unicode__ (self):
         return self.product
