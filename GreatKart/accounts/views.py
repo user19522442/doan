@@ -4,6 +4,8 @@ from .forms import RegistrationForm
 from .models import Account
 from django.contrib import messages, auth
 from django.contrib.auth.decorators import login_required
+from carts.models import Cart,CartItem
+from carts.views import _cart_id
 
 # verification email
 from django.contrib.sites.shortcuts import get_current_site
@@ -61,6 +63,13 @@ def register(request):
     return render(request, 'accounts/register.html',context)
 
 def login(request):
+    """
+    lấy giá trị từ form post của người dùng nếu người dùng không none, 
+    chúng ta sẽ cho đăng nhập sau đó kiểm tra giỏ hàng của người dùng
+    xem họ có sản phẩm trong giỏ hàng không, sau đó tìm xem nếu mã người dùng đúng
+    thì thêm dữ liệu vào
+    còn nếu none thì in ra thông báo lỗi và trả về trang login
+    """
     if request.method == "POST":
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -68,8 +77,46 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
 
         if user is not None:
+            try:
+                cart = Cart.objects.get(cart_id = _cart_id(request))
+                is_cart_item_exists = CartItem.objects.filter(cart=cart).exists()
+                if is_cart_item_exists:
+                    cart_item = CartItem.objects.filter(cart=cart)
+
+                    # lấy thuộc tính màu và kích cỡ của sản phẩm
+                    product_variation = []
+                    for item in cart_item:
+                        variation = item.variations.all()
+                        product_variation.append(list(variation))
+                
+                    # lấy sản phẩm của user dựa vào thuộc tính màu và kích cỡ trong giỏ người dùng
+                    cart_item = CartItem.objects.filter(user =user)
+                    ex_var_list = []
+                    id = []
+                    for item in cart_item:
+                        existing_variation = item.variations.all()
+                        ex_var_list.append(list(existing_variation))
+                        id.append(item.id)
+                    
+                    # product_variation = [1,2,3,4,6]
+                    # ex_var_list = [4,6,3,5]
+                    for pr in product_variation:
+                        if pr in ex_var_list:
+                            index = ex_var_list.index(pr)
+                            item_id = id[index]
+                            item = CartItem.objects.get(id = item_id)
+                            item.quality += 1
+                            item.user = user
+                            item.save()
+                        else:
+                            cart_item = CartItem.objects.filter(cart=cart)
+                            for item in cart_item:
+                                item.user = user
+                                item.save()
+            except:
+                pass
             auth.login(request,user)
-            # messages.success(request,"You are now login")
+            messages.success(request,"You are now login")
             return redirect('dashboard')
         else:
             messages.error(request,"Invalid login ")
@@ -79,11 +126,21 @@ def login(request):
 @login_required(login_url = 'login')
 
 def logout(request):
+    """
+    cho user logout bằng hàm có sẵn trong thư viện auth cùng với thông báo
+    You are logged out và trở về trang đăng nhập
+    """
     auth.logout(request)
     messages.success(request,"You are logged out")
     return redirect('login')
 
 def activate(request,uidb64,token):
+    """
+    kích hoạt tài khoản để người dùng có thể đăng nhập bằng cách đưa uid của người dùng
+    nếu người dùng có thì ta tạo ra token và cho kích hoạt, hiển thị thông báo
+    và trở về trang login,
+    còn nếu không thì ta thông báo là link này không đúng và đưa về trang đăng ký
+    """
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
         user = Account._default_manager.get(pk=uid)
@@ -105,6 +162,12 @@ def dashboard(request):
   return render(request,  'accounts/dashboard.html')
 
 def forgotPassword(request):
+    """
+    lấy gmail từ form gửi của người dùng sau đó lấy link trang hiện tại,
+    bắt đầu gửi mail cho người dùng để xác nhận, khi người dùng mở mail và nhấn 
+    vào đường dẫn thì đưa họ về trang reset mật khẩu nếu email đó tồn tại
+    không thì đưa ra lỗi là tài khoản không tồn tại
+    """
     if request.method == 'POST':
         email = request.POST['email']
         if Account.objects.filter(email=email).exists():
@@ -128,6 +191,11 @@ def forgotPassword(request):
             return redirect('forgotPassword')
     return render(request, 'accounts/forgotPassword.html')
 
+"""
+bắt đầu lấy người dùng theo uid nếu có thông tin người dùng thì 
+ta bắt đầu check token rồi đưa ra thông tin cho họ đổi mật khẩu
+trả về httpresponse ok
+"""
 def resetpassword_validate(request,uidb64,token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
@@ -142,6 +210,11 @@ def resetpassword_validate(request,uidb64,token):
         messages.error(request, "This link has ben expired!")
     return HttpResponse("OK")
 
+"""
+lấy mật khẩu từ form reset password rồi so sánh
+password và confirm_password, nếu trùng thì lưu
+không thì hiển thị rằng xác nhận mật khẩu không đúng
+"""
 def resetPassword(request):
     if request.method == 'POST':
         password = request.POST['password']
