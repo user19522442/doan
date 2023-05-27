@@ -37,7 +37,7 @@ def payments(request):
         orderproduct.payment = payment
         orderproduct.user_id = request.user.id
         orderproduct.product_id = item.product_id
-        orderproduct.quality = item.quality
+        orderproduct.quantity = item.quality
         orderproduct.product_price = item.product.price
         orderproduct.ordered = True
         orderproduct.save()
@@ -132,7 +132,7 @@ def place_order(request, total=0, quality=0,):
                 'tax': tax,
                 'grand_total': grand_total,
             }
-            return redirect('checkout')
+            return render(request, 'orders/payments.html', context)
     else:
         return redirect('checkout')
 
@@ -147,7 +147,7 @@ def order_complete(request):
 
         subtotal = 0
         for i in ordered_products:
-            subtotal += i.product_price * i.quality
+            subtotal += i.product_price * i.quantity
 
         payment = Payment.objects.get(payment_id=transID)
 
