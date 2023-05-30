@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 <!-- ========================= SECTION CONTENT ========================= -->
 <section class="section-conten padding-y bg">
@@ -54,10 +54,10 @@
             <table class="table table-hover">
                 <tr>
                     <td width="65">
-                        <img src="../images/items/1.jpg" class="img-xs border">
+                        <img src="{% static './images/items/1.jpg' %}" class="img-xs border">
                     </td>
                     <td> 
-                        <p class="title mb-0">Product name goes here </p>
+                        <p class="title mb-0">Shirt </p>
                         <var class="price text-muted">USD 145</var>
                     </td>
                     <td> Seller <br> Nike clothing </td>
@@ -65,10 +65,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <img src="../images/items/2.jpg" class="img-xs border">
+                        <img src="{% static './images/items/2.jpg' %}" class="img-xs border">
                     </td>
                     <td> 
-                        <p class="title mb-0">Another name goes here </p>
+                        <p class="title mb-0">Jacket </p>
                         <var class="price text-muted">USD 15</var>
                     </td>
                     <td> Seller <br> ABC shop </td>
@@ -76,10 +76,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <img src="../images/items/3.jpg" class="img-xs border">
+                        <img src="{% static './images/items/3.jpg' %}" class="img-xs border">
                     </td>
                     <td> 
-                        <p class="title mb-0">The name of the product  goes here </p>
+                        <p class="title mb-0">Pant</p>
                         <var class="price text-muted">USD 145</var>
                     </td>
                     <td> Seller <br> Wallmart </td>
