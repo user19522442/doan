@@ -64,11 +64,11 @@ def register(request):
 
 def login(request):
     """
-    lấy giá trị từ form post của người dùng nếu người dùng không none, 
-    chúng ta sẽ cho đăng nhập sau đó kiểm tra giỏ hàng của người dùng
-    xem họ có sản phẩm trong giỏ hàng không, sau đó tìm xem nếu mã người dùng đúng
-    thì thêm dữ liệu vào
-    còn nếu none thì in ra thông báo lỗi và trả về trang login
+- Nếu request trang login là POST thì ta lấy email và password người dùng nhập 
+vào so sánh với trong database. Nếu không khớp thì ta hiển thị lỗi, 
+đúng thì ta kiểm tra xem giỏ hàng có sản phẩm thêm vào không, 
+nếu có sản phẩm thêm vào thì ta bắt đầu gán sản phẩm đó cho người dùng 
+và trở về trang dashboard.
     """
     if request.method == "POST":
         email = request.POST.get('email')

@@ -10,6 +10,12 @@ from django.contrib import messages
 from orders.models import OrderProduct
 
 # Create your views here.
+"""
+- category_slug là mã để gom nhóm (jeans, shirt)
+- nếu category_slug có thì ta lấy sản phẩm ra và thực hiện đếm số lượng,
+hiển thị sản phẩm theo nhóm sau đó thực hiện phân trang 
+- nếu category_slug là None thì ta hiển thị toàn bộ sản phẩm
+"""
 def store(request,category_slug=None):
     categories = None
     products = None
@@ -35,6 +41,12 @@ def store(request,category_slug=None):
     }
     return render(request,'store/store.html',context)
 
+"""
+ta lấy sản phẩm đó dựa vào category_slug và product_slug và kiểm tra sản phẩm có trong giỏ?
+nếu người dùng đã đăng nhập thì ta đem sản phẩm đó vào khồng thì để là none
+lấy bài viết đánh giá ở trong database và hiển thị
+
+"""
 def product_detail(request,category_slug, product_slug): # category__slug to connect its slug
     try:
         single_product = Product.objects.get(category__slug = category_slug,slug = product_slug)
